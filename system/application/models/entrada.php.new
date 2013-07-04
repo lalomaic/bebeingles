@@ -1,0 +1,200 @@
+<?php
+
+/**
+ * Tipo Entrada Class
+ *
+ * Transforms users table into an object.
+ * This is just here for use with the example in the Controllers.
+ *
+ * @licence 	MIT Licence
+ * @category	Models
+ * @author  	Salvador Salgado Ram?re SARS
+ * @link    	
+ */
+class Entrada extends DataMapper {
+
+var $table= "entradas";
+	
+	function  Entrada($id=null)
+	{
+		parent::DataMapper($id);
+
+	}
+	
+	// --------------------------------------------------------------------
+	
+	/**
+	 * Tipo Entrada
+	 *
+	 * Authenticates a user for logging in.
+	 *
+	 * @access	public
+	 * @return	bool
+	 */
+	function get_entradas()
+	{
+	  // Create a temporary user object
+	  $e = new Entrada();
+	  //Buscar en la base de datos
+	  $e->get();
+	  if($e->c_rows>0){
+	  return $e;
+	  } else {
+	  return FALSE;
+	  }
+	}
+
+	function get_entradas_list($offset, $per_page, $ubicacion, $where, $periodo)
+	  {
+	    // Create a temporary user object
+	    $u = new Entrada();
+	    $sql="select distinct(e.pr_facturas_id), e.id as id1, e.fecha, sum(costo_total) as importe_factura, pr.razon_social as proveedor,prf.folio_factura, prf.pr_pedido_id, ef.tag as espacio_fisico, eg.tag as estatus from entradas as e left join cproveedores as pr on pr.id=e.cproveedores_id left join pr_facturas as prf on prf.id=e.pr_facturas_id left join espacios_fisicos as ef on ef.id=e.espacios_fisicos_id left join estatus_general as eg on eg.id=e.estatus_general_id $where $periodo group by e.pr_facturas_id, e.cproveedores_id order by e.fecha desc limit $offset, $per_page ";
+
+	    //Buscar en la base de datos
+	    $u->query($sql);
+	    if($u->c_rows > 0){
+	      return $u;
+	    } else {
+	      return FALSE;
+	    }
+	  }
+	function get_entradas_list_count($ubicacion, $where, $periodo)
+	  {
+	    // Create a temporary user object
+	    $u = new Entrada();
+	    $sql="select count(distinct(e.pr_facturas_id)) as total from entradas as e left join cproveedores as pr on pr.id=e.cproveedores_id left join pr_facturas as prf on prf.id=e.pr_facturas_id left join espacios_fisicos as ef on ef.id=e.espacios_fisicos_id left join estatus_general as eg on eg.id=e.estatus_general_id $where $periodo";
+	    //Buscar en la base de datos
+	    $u->query($sql);
+	    if($u->c_rows > 0){
+	      return $u->total;
+	    } else {
+	      return FALSE;
+	    }
+	  }
+
+	  function get_entrada($id)
+	{
+	  // Create a temporary user object
+	  $u = new Entrada();
+	  //Buscar en la base de datos
+	  $u->get_by_id($id);
+	  if($u->c_rows ==1){
+	    return $u;
+	  } else {
+	    return FALSE;
+	  }
+	}
+	function get_entrada_pr_factura($pr_factura_id)
+	  {
+	    // Create a temporary user object
+	    $u = new Entrada();
+	    $sql="select e.id as entrada_id, e.*, pr.razon_social as proveedor, cp.*, prf.folio_factura, cte.tag as tipo_entrada, ef.tag as espacio_fisico, eg.tag as estatus, um.tag as unidad_medida from entradas as e left join cproveedores as pr on pr.id=e.cproveedores_id left join pr_facturas as prf on prf.id=e.pr_facturas_id left join ctipos_entradas as cte on cte.id=e.ctipo_entrada left join espacios_fisicos as ef on ef.id=e.espacios_fisicos_id left join estatus_general as eg on eg.id=e.estatus_general_id left join cproductos as cp on cp.id=e.cproductos_id left join cunidades_medidas as um on um.id=cp.cunidad_medida_id where e.estatus_general_id='1' and pr_facturas_id='$pr_factura_id' order by cp.descripcion asc";
+	    //Buscar en la base de datos
+	    $u->query($sql);
+	    if($u->c_rows > 0){
+	      return $u;
+	    } else {
+	      return FALSE;
+	    }
+	  }
+
+	  function get_entradas_boni_list($offset, $per_page, $ubicacion)
+	  {
+	    // Create a temporary user object
+	    $u = new Entrada();
+	    $sql="select distinct(e.pr_facturas_id), e.id as id1, e.fecha, sum(costo_total) as importe_factura, pr.razon_social as proveedor,prf.folio_factura, prf.pr_pedido_id, ef.tag as espacio_fisico, eg.tag as estatus from entradas as e left join cproveedores as pr on pr.id=e.cproveedores_id left join pr_facturas as prf on prf.id=e.pr_facturas_id left join espacios_fisicos as ef on ef.id=e.espacios_fisicos_id left join estatus_general as eg on eg.id=e.estatus_general_id where e.espacios_fisicos_id=$ubicacion and e.estatus_general_id=1 and ctipo_entrada=9 group by e.pr_facturas_id, e.cproveedores_id order by e.fecha desc limit $offset, $per_page ";
+
+	    //Buscar en la base de datos
+	    $u->query($sql);
+	    if($u->c_rows > 0){
+	      return $u;
+	    } else {
+	      return FALSE;
+	    }
+	  }
+	function get_entradas_boni_list_count($ubicacion)
+	  {
+	    // Create a temporary user object
+	    $u = new Entrada();
+	    $sql="select count(distinct(e.pr_facturas_id)) as total from entradas as e left join cproveedores as pr on pr.id=e.cproveedores_id left join pr_facturas as prf on prf.id=e.pr_facturas_id left join espacios_fisicos as ef on ef.id=e.espacios_fisicos_id left join estatus_general as eg on eg.id=e.estatus_general_id where e.espacios_fisicos_id=$ubicacion and e.estatus_general_id=1 and ctipo_entrada=9";
+	    //Buscar en la base de datos
+	    $u->query($sql);
+	    if($u->c_rows == 1){
+	      return $u->total;
+	    } else {
+	      return FALSE;
+	    }
+	  }
+//Usada por supervision_reportes para rep_ajuste_pdf
+	  function get_precio_unitario($id)
+	{
+	  // Create a temporary user object
+	  $u = new Entrada();
+	  //Buscar en la base de datos
+	  $u->select("costo_unitario");
+	  $u->get_by_id($id);
+	  if($u->c_rows ==1){
+	    return $u->costo_unitario;
+	  } else {
+	    return 0;
+	  }
+	}
+
+	function get_entradas_general_list($offset, $per_page, $where, $periodo)
+	  {
+	    // Create a temporary user object
+	    $u = new Entrada();
+	    $sql="select distinct(e.pr_facturas_id), e.id as id1, e.fecha, sum(costo_total) as importe_factura, pr.razon_social as proveedor,prf.folio_factura, prf.pr_pedido_id, ef.tag as espacio_fisico, eg.tag as estatus from entradas as e left join cproveedores as pr on pr.id=e.cproveedores_id left join pr_facturas as prf on prf.id=e.pr_facturas_id left join espacios_fisicos as ef on ef.id=e.espacios_fisicos_id left join estatus_general as eg on eg.id=e.estatus_general_id $where $periodo group by e.pr_facturas_id, e.cproveedores_id order by e.fecha desc limit $offset, $per_page ";
+
+	    //Buscar en la base de datos
+	    $u->query($sql);
+	    if($u->c_rows > 0){
+	      return $u;
+	    } else {
+	      return FALSE;
+	    }
+	  }
+	function get_entradas_general_list_count($where, $periodo)
+	  {
+	    // Create a temporary user object
+	    $u = new Entrada();
+	    $sql="select count(distinct(e.pr_facturas_id)) as total from entradas as e left join cproveedores as pr on pr.id=e.cproveedores_id left join pr_facturas as prf on prf.id=e.pr_facturas_id left join espacios_fisicos as ef on ef.id=e.espacios_fisicos_id left join estatus_general as eg on eg.id=e.estatus_general_id $where $periodo ";
+	    //Buscar en la base de datos
+	    $u->query($sql);
+	    if($u->c_rows > 0){
+	      return $u->total;
+	    } else {
+	      return FALSE;
+	    }
+	  }
+
+	  function get_entradas_boni_gral_list($offset, $per_page, $where, $periodo)
+	  {
+	    // Create a temporary user object
+	    $u = new Entrada();
+	    $sql="select distinct(e.pr_facturas_id), e.id as id1, e.fecha, sum(costo_total) as importe_factura, pr.razon_social as proveedor,prf.folio_factura, prf.pr_pedido_id, ef.tag as espacio_fisico, eg.tag as estatus from entradas as e left join cproveedores as pr on pr.id=e.cproveedores_id left join pr_facturas as prf on prf.id=e.pr_facturas_id left join espacios_fisicos as ef on ef.id=e.espacios_fisicos_id left join estatus_general as eg on eg.id=e.estatus_general_id $where $periodo group by e.pr_facturas_id, e.cproveedores_id order by e.fecha desc limit $offset, $per_page";
+
+	    //Buscar en la base de datos
+	    $u->query($sql);
+	    if($u->c_rows > 0){
+	      return $u;
+	    } else {
+	      return FALSE;
+	    }
+	  }
+	function get_entradas_boni_gral_list_count($where, $periodo)
+	  {
+	    // Create a temporary user object
+	    $u = new Entrada();
+	    $sql="select count(distinct(e.pr_facturas_id)) as total from entradas as e left join cproveedores as pr on pr.id=e.cproveedores_id left join pr_facturas as prf on prf.id=e.pr_facturas_id left join espacios_fisicos as ef on ef.id=e.espacios_fisicos_id left join estatus_general as eg on eg.id=e.estatus_general_id $where $periodo ";
+	    //Buscar en la base de datos
+	    $u->query($sql);
+	    if($u->c_rows > 0){
+	      return $u->total;
+	    } else {
+	      return FALSE;
+	    }
+	  }
+
+
+}

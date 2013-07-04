@@ -1,0 +1,132 @@
+<?php
+
+/**
+ * Modelo para Escribir el menu en la IGU fuera de DataMapper
+ *
+ * Transforms users table into an object.
+ * This is just here for use with the example in the Controllers.
+ *
+ * @licence 	MIT Licence
+ * @category	Models
+ * @author  	Salvador Salgado Ramí­rez SARS
+ * @link
+ */
+class Menu extends Model{
+
+
+	function Menu()
+	{
+		parent::Model();
+		$this->load->model( 'usuario_acc' );
+		$this->load->model( 'usuario' );
+		$this->load->model( 'modulo' );
+		$this->load->model( 'submodulo' );
+		$this->load->model( 'accion' );
+
+	}
+
+	function menus($usuarioid, $tipo_menu="principal", $mid){
+		$row=$this->usuario->get_usuario($usuarioid);
+		$username=$row->username;
+		$grupoid=$row->grupo_id;
+		$puestoid=$row->puesto_id;
+		//Obtener los menus
+
+		if($this->usuario_acc->modulos_usuario($usuarioid)!=false) {
+			$validate=true;
+			//Buscando permisos especificos
+			$modulos=$this->usuario_acc->modulos_usuario($usuarioid);
+			$submodulos=$this->usuario_acc->submodulos_usuario($usuarioid);
+			$acciones=$this->usuario_acc->acciones_usuario($usuarioid);
+
+		} else {
+			//Buscar por el tipo de puesto
+			$modulos=$this->usuario_acc->modulos_puesto($puestoid);
+			if($modulos!=false){
+				$submodulos=$this->usuario_acc->submodulos_puesto($puestoid);
+				$acciones=$this->usuario_acc->acciones_puesto($puestooid);
+				$validate=true;
+
+			} else {
+				//Buscar por el grupo
+				$modulos=$this->usuario_acc->modulos_grupo($grupoid);
+				if($modulos!=false){
+					$submodulos=$this->usuario_acc->submodulos_grupo($grupoid);
+					$acciones=$this->usuario_acc->acciones_grupo($grupoid);
+					$validate=true;
+				} else {
+					//**************No existen asignaciones para el usuario, ejecutar una accion para este tipo de usuarios
+					$data['error_field']='<div id="message">El usuario no tiene establecidos permisos de acceso definidos, consulte con el Administrador del Sistema.</div>';
+					$this->load->view('error',$data);
+					$validate=false;
+				}
+			}
+	    }
+
+	    if($validate==true){
+			/*Generar las matrices para los menus con los Modulos y Submodulos
+			MODULOS*/
+			$r=0;
+			$colect1=array();
+			foreach($modulos->result() as $row){
+				$line=$this->modulo->get_modulo($row->modulo_id);
+				if($line!=false){
+					$colect1[$r]['modulo_id']=$line->id;
+					$colect1[$r]['nombre']=$line->nombre;
+					$colect1[$r]['ruta']=$line->ruta;
+				}
+				$r+=1;
+			}
+
+			//print_r(array_values($colect1));
+			$u= new Usuario();
+			$u->main_menu=$colect1;
+
+			if($tipo_menu=="submodulos"){
+				$colect2=array();
+				//Submodulos
+				foreach($submodulos->result() as $row) {
+					//echo $row->submodulo_id."%$row->tag<br/>";
+					$line=$this->submodulo->get_submodulo($row->submodulo_id);
+					if($line!=false){
+						if($line->modulo_id == $mid){
+							$colect2[$row->submodulo_id]['submodulo_id']=$line->id;
+							$line1=$this->modulo->get_modulo($mid);
+							$colect2[$row->submodulo_id]['ruta']=$line1->ruta;
+							$colect2[$row->submodulo_id]['modulo_id']=$line->modulo_id;
+							$colect2[$row->submodulo_id]['nombre']=$line->nombre;
+							$colect2[$row->submodulo_id]['controller']=$line->controller;
+
+							//Agregar las acciones asignadas
+							foreach($acciones->result() as $row2) {
+								$line2=$this->accion->get_accion($row2->acciones_id);
+								if($line2!=false){
+									if($line2->submodulo_id==$row->submodulo_id){
+										$colect3[$row2->acciones_id]['accion_id']=$line2->id;
+										$colect3[$row2->acciones_id]['submodulo_id']=$line2->submodulo_id;
+										$colect3[$row2->acciones_id]['nombre_accion']=$line2->nombre;
+										$colect3[$row2->acciones_id]['function_controller']=$line2->function_controller;
+										$colect3[$row2->acciones_id]['tipo_accion_id']=$line2->tipo_accion_id;
+									}
+								}
+							}
+						}
+					}
+				}
+
+		      $com[0]=$colect2;
+		      $com[1]=$colect3;
+
+
+		  return $com;
+		} else {
+		  return $colect1;
+		}
+
+	      } else {
+		  return false;
+	      }
+	    }
+
+
+}

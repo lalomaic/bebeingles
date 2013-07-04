@@ -1,0 +1,233 @@
+<?php
+class Pagos_c extends Controller {
+  //var $usuarioid, $username, $ruta, $controller, $funcion, $subfuncion, $modulos_totales;
+
+	function Pagos_c()
+	{
+	  parent::Controller();	
+	  if($this->session->userdata('logged_in') == FALSE){redirect(base_url()."index.php/inicio/logout");}
+	  $this->load->model("forma_pago");
+	  $this->load->model("pr_factura");
+	  $this->load->model("cuenta_bancaria");
+	  $this->load->model("tipo_pago");
+	  $this->load->model("pago");
+	  $this->load->model("proveedor");
+	  $this->load->model("pago_validacion");
+	  //$this->load->model("espacio_fisico");
+	  $user_hash=$this->session->userdata('user_data');
+	  $row=$this->usuario->get_usuario_detalles($user_hash);
+	  $GLOBALS['usuarioid']=$row->id;
+	  $GLOBALS['username']=$row->username;
+	  $GLOBALS['ruta']=$this->uri->segment(1);
+	  $GLOBALS['controller']=$this->uri->segment(2);
+	  $GLOBALS['funcion']=$this->uri->segment(3);
+	  $GLOBALS['subfuncion']=$this->uri->segment(4);
+	  $GLOBALS['modulos_totales']=$this->modulo->get_tmodulos();
+	  $GLOBALS['main_menu']=$this->menu->menus($GLOBALS['usuarioid'],"principal",0);
+	}
+
+
+	function formulario(){
+	//Funcion para manejar formularios y listados, 
+	global $main_menu, $usuarioid, $username, $ruta, $controller, $funcion, $subfuncion, $modulos_totales;
+
+	  $main_view=false;
+	  $data['username']=$username;
+	  $data['usuarioid']=$usuarioid;
+	  $data['modulos_totales']=$modulos_totales;
+	  $data['colect1']=$main_menu;
+	  $data['title']=$this->accion->get_title("$subfuncion");
+	  $accion_id=$this->accion->get_id("$subfuncion");
+	  $row=$this->usuario->get_usuario($usuarioid);
+	  $grupoid=$row->grupo_id;
+	  $puestoid=$row->puesto_id;
+	  $data['ruta']=$ruta;
+	  $data['controller']=$controller;
+	  $data['funcion']=$funcion;
+	  $data['subfuncion']=$subfuncion;
+	  $data['permisos']=$this->usuario_accion->get_permiso($accion_id, $usuarioid, $puestoid, $grupoid);
+
+	  //Validacion del arreglo del menu, usuarioid y permisos especificos
+	  if(is_array($data['colect1']) and $usuarioid>0 and $data['permisos']!= false and $this->session->userdata('logged_in') == TRUE){
+	    $main_view=true;
+	    //Inicio del Bloque Alta Forma Pago
+	    if($subfuncion=="alta_pr_forma_pago"){
+	      //Cargar los datos para el formulario
+	      $data['principal']=$ruta."/".$subfuncion;    
+	      $data['validation']=$this->pago_validacion->validacion_forma_pago();    
+	     
+	    } else if($subfuncion=="list_pr_formas_pago"){
+
+	      if($this->uri->segment(5)=="editar_pr_forma_pago"){
+	      //Cargar los datos para el formulario 
+	      $edit_usr=$this->uri->segment(5);
+	      $id=$this->uri->segment(6);
+	      //Definir la vista
+	      $data['principal']=$ruta."/editar_pr_forma_pago";
+	      //Obtener Datos 
+	      $data['forma_pago']=$this->forma_pago->get_forma_pago($id);
+	      $data['validation']=$this->pago_validacion->validacion_forma_pago();
+
+
+	    } else if($this->uri->segment(5)=="borrar_forma_pago"){
+	      $iduser=$this->uri->segment(6);
+	      $main_view=false;
+
+	      redirect(base_url()."index.php/".$ruta."/".$controller."/".$funcion."/".$subfunction);
+
+	    } else  {
+
+	      //Cargar los datos para el listado 
+	      $data['principal']=$ruta."/".$subfuncion;
+	      //Obtener Datos 
+	      // load pagination class
+	      $this->load->library('pagination');
+	      $config['base_url'] = base_url()."index.php/".$ruta."/".$controller."/".$funcion."/list_pr_formas_pago";
+	      $config['per_page'] = '10';
+	      $page=$this->uri->segment(5);
+	      //Identificar el numero de pagina en el paginador si existe
+	      if($page>0) {
+		$offset=$page;
+	      } else if ($page==''){
+		$offset=0;
+	      } else {
+		$offset=0;
+	      }
+
+	      $u1=new Forma_pago();
+	      $u1->get();
+	      $total_registros=$u1->c_rows;
+	      $data['formas_pagos']=$this->forma_pago->get_formas_pagos_list($offset, $config['per_page']);
+	      $data['total_registros']=$total_registros;
+	      $config['total_rows'] = $total_registros;
+	      $this->pagination->initialize($config);
+
+	    }
+	    } //Final del Bloque Alta Forma de Pago
+		
+		//Inicio del Bloque Alta Tipo Pago
+	    else if($subfuncion=="alta_tipo_pago"){
+	      //Cargar los datos para el formulario
+	      //Definir la vista
+	      $data['principal']=$ruta."/".$subfuncion;    
+	      $data['validation']=$this->pago_validacion->validacion_tipo_pago();    
+	     
+	    } else if($subfuncion=="list_tipos_pagos"){
+
+	      if($this->uri->segment(5)=="editar_tipo_pago"){
+	      //Cargar los datos para el formulario 
+	      $edit_usr=$this->uri->segment(5);
+	      $id=$this->uri->segment(6);
+	      //Definir la vista
+	      $data['principal']=$ruta."/editar_tipo_pago";
+	      //Obtener Datos 
+	      $data['tipo_pago']=$this->tipo_pago->get_tipo_pago($id);
+
+	    } else if($this->uri->segment(5)=="borrar_tipo_pago"){
+	      $iduser=$this->uri->segment(6);
+	      $main_view=false;
+	      $data['validation']=$this->pago_validacion->validacion_tipo_pago();
+
+	      redirect(base_url()."index.php/".$ruta."/".$controller."/".$funcion."/".$subfunction);
+
+	    } else  {
+	      //Definir la vista
+	      $data['principal']=$ruta."/".$subfuncion;
+	      //Obtener Datos 
+	      // load pagination class
+	      $this->load->library('pagination');
+	      $config['base_url'] = base_url()."index.php/".$ruta."/".$controller."/".$funcion."/list_tipos_pagos";
+	      $config['per_page'] = '10';
+	      $page=$this->uri->segment(5);
+	      //Identificar el numero de pagina en el paginador si existe
+	      if($page>0) {
+		$offset=$page;
+	      } else if ($page==''){
+		$offset=0;
+	      } else {
+		$offset=0;
+	      }
+
+	      $u1=new Tipo_pago();
+	      $u1->get();
+	      $total_registros=$u1->c_rows;
+	      $data['tipos_pagos']=$this->tipo_pago->get_tipos_pagos_list($offset, $config['per_page']);
+	      $data['total_registros']=$total_registros;
+	      $config['total_rows'] = $total_registros;
+	      $this->pagination->initialize($config);
+
+	    }
+	    } //Final del Bloque Alta Tipo de Pago
+		
+		//Inicio del Bloque Alta Pago
+	    else if($subfuncion=="alta_pago"){
+	      //Definir la vista
+	      $data['principal']=$ruta."/".$subfuncion;
+		  //Obtener Datos
+	      $data['validation']=$this->pago_validacion->validacion_pago();
+	      $data['proveedores']=$this->proveedor->get_proveedores();
+	      $data['facturas']=$this->pr_factura->get_pr_facturas();
+	      $data['formas_pagos']=$this->forma_pago->get_formas_pagos();
+	      $data['cuentas_bancarias']=$this->cuenta_bancaria->get_ccuentas_bancarias();
+	      $data['tipos_pagos']=$this->tipo_pago->get_ctipos_pagos();    
+	     
+	    } else if($subfuncion=="list_pagos"){
+
+	      if($this->uri->segment(5)=="editar_pago"){
+	      //Cargar los datos para el formulario 
+	      $edit_usr=$this->uri->segment(5);
+	      $id=$this->uri->segment(6);
+	      //Definir la vista
+	      $data['principal']=$ruta."/editar_pago";
+	      //Obtener Datos 
+	      $data['validation']=$this->pago_validacion->validacion_pago();
+	      $data['pago']=$this->pago->get_pago($id);
+	      $data['facturas']=$this->pr_factura->get_pr_facturas();
+	      $data['formas_pagos']=$this->forma_pago->get_formas_pagos();
+	      $data['cuentas_bancarias']=$this->cuenta_bancaria->get_ccuentas_bancarias();
+	      $data['tipos_pagos']=$this->tipo_pago->get_ctipos_pagos();
+
+	    } else if($this->uri->segment(5)=="borrar_pago"){
+	      $iduser=$this->uri->segment(6);
+
+	    } else  {
+
+	      //Cargar los datos para el listado 
+	      //Definir la vista
+	      $data['principal']=$ruta."/".$subfuncion;
+	      //Obtener Datos 
+	      // load pagination class
+	      $this->load->library('pagination');
+	      $config['base_url'] = base_url()."index.php/".$ruta."/".$controller."/".$funcion."/list_pagos";
+	      $config['per_page'] = '20';
+	      $page=$this->uri->segment(5);
+	      //Identificar el numero de pagina en el paginador si existe
+	      if($page>0) {
+		$offset=$page;
+	      } else if ($page==''){
+		$offset=0;
+	      } else {
+		$offset=0;
+	      }
+
+	      $u1=new Pago();
+	      $u1->get();
+	      $total_registros=$u1->c_rows;
+	      $data['pagos']=$this->pago->get_pagos_list($offset, $config['per_page']);
+	      $data['total_registros']=$total_registros;
+	      $config['total_rows'] = $total_registros;
+	      $this->pagination->initialize($config);
+
+	    }
+	    } //Final del Bloque Alta Pago 
+	  if($main_view){
+	    //Llamar a la vista
+	    $this->load->view("ingreso", $data);
+	  } else {
+	    redirect(base_url()."index.php/inicio/logout");
+	  }
+	}
+
+  }
+}
+?>

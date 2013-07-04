@@ -1,0 +1,74 @@
+<?php
+class Usuario_c extends Controller {
+  //var $usuarioid, $username, $ruta, $controller, $funcion, $subfuncion, $modulos_totales;
+
+	function Usuario_c()
+	{
+	  parent::Controller();	
+	  $this->load->model("modulo");
+	  $this->load->model("menu");
+	  $this->load->model("usuario");
+	  $this->load->model("empresa");
+	  $this->load->model("espacio_fisico");
+	  $user_hash=$this->session->userdata('user_data');
+	  $row=$this->usuario->get_usuario_detalles($user_hash);
+	  $GLOBALS['usuarioid']=$row->id;
+	  $GLOBALS['username']=$row->username;
+	  $GLOBALS['ruta']=$this->uri->segment(1);
+	  $GLOBALS['controller']=$this->uri->segment(2);
+	  $GLOBALS['funcion']=$this->uri->segment(3);
+	  $GLOBALS['subfuncion']=$this->uri->segment(4);
+	  $GLOBALS['modulos_totales']=$this->modulo->get_tmodulos();
+	  $GLOBALS['main_menu']=$this->menu->menus($GLOBALS['usuarioid'],"principal",0);
+	}
+
+
+	function formulario(){
+	global $main_menu, $usuarioid, $username, $ruta, $controller, $funcion, $subfuncion, $modulos_totales;
+
+	  $main_view=true;
+	  $data['username']=$username;
+	  $data['modulos_totales']=$modulos_totales;
+	  $data['colect1']=$main_menu;
+
+	  //Validacion del arreglo del menu y un usuarioid
+	  if(is_array($data['colect1']) and $usuarioid>0){
+	    if($subfuncion=="alta_usuario"){
+	      //Cargar los datos para el formulario 
+	      //Titulo
+	      $data['title']="Alta de Usuario";
+	      $data['ruta']=$ruta;
+	      //Definir el numero de frames
+	      $dataÃÂ['frames']=0;
+	      //Definir la vista
+	      $data['principal']=$ruta."/".$subfuncion;
+	      //Obtener Datos 
+	      $data['empresas']=$this->empresa->get_empresas();
+	      $data['espacios_fisicos']=$this->espacio_fisico->get_espacios_f();
+
+	    } else if($subfunction="list_usuarios"){
+	      //Cargar los datos para el formulario 
+	      //Titulo
+	      $data['title']="Listado de Usuarios";
+	      $data['ruta']=$ruta;
+	      $data['controller']=$controller;
+	      $data['funcion']=$funcion;
+	      $data['subfuncion']=$subfuncion;
+	      //Definir el numero de frames
+	      $dataÃÂ['frames']=1;
+	      //Definir la vista
+	      $data['principal']=$ruta."/".$subfuncion;
+	      //Obtener Datos 
+	      $data['usuarios']=$this->usuario->get_usuarios_list();
+
+	    }
+
+	  if($main_view){
+	    //Llamar a la vista
+	    $this->load->view("ingreso", $data);
+	  }
+	}
+
+  }
+}
+?>
