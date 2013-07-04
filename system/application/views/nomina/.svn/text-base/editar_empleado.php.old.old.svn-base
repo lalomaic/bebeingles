@@ -1,0 +1,144 @@
+
+<?php
+# espacios fisicos
+$espacio=array();
+foreach($espacios as $row)
+	$espacio[$row->id]=$row->tag;
+# horarios
+$horario=array();
+foreach($horarios as $row)
+	{
+	$horario[$row->id]=$row->tag;
+	}
+# nominas
+$nomina=array();
+foreach($nominas as $row)
+	{
+	$nomina[$row->id]=$row->tag;
+	}
+# puestos
+$puesto=array();
+foreach($puestos as $row)
+	{
+	$puesto[$row->id]=$row->tag;
+	}
+# otros campos
+$nombre=array(
+	'name'=>'nombre',
+	'size'=>'30',
+	'value'=>$e->nombre,
+	'id'=>'nombre',
+	);
+$apaterno=array(
+	'name'=>'apaterno',
+	'size'=>'30',
+	'value'=>$e->apaterno,
+	'id'=>'apaterno',
+	);
+$amaterno=array(
+	'name'=>'amaterno',
+	'size'=>'30',
+	'value'=>$e->amaterno,
+	'id'=>'amaterno',
+	);
+$rfc=array(
+	'name'=>'rfc',
+	'size'=>'30',
+	'value'=>$e->rfc,
+	'id'=>'rfc',
+	);
+$curp=array(
+	'name'=>'curp',
+	'size'=>'30',
+	'value'=>$e->curp,
+	'id'=>'curp',
+	);
+$num_seguro=array(
+	'name'=>'num_seguro',
+	'size'=>'30',
+	'value'=>$e->num_seguro,
+	'id'=>'num_seguro',
+	);
+$domicilio=array(
+	'name'=>'domicilio',
+	'cols'=>'40',
+	'rows'=>'4',
+	'value'=>$e->domicilio,
+	'id'=>'domicilio',
+	);
+
+$telefono=array(
+	'name'=>'telefono',
+	'size'=>'20',
+	'value'=>$e->telefono,
+	'id'=>'telefono',
+	);
+
+//Titulo
+echo "<h2>$title</h2>";
+
+//Load validacion
+$this->load->view('validation_view');
+
+//Abrir Formulario
+$atrib=array('name'=>'form1','id'=>'form1');
+echo form_open($ruta.'/empleado_c/alta_empleado', $atrib) . "\n";
+echo form_fieldset('<b>Datos del empleado</b>') . "\n";
+//Mensajes de validacion
+echo '<div id="validation_result" class="result_validator" align="center" width="200px"></div>';
+
+echo "<table width=\"80%\" class='form_table'>";
+$img_row="".base_url()."images/table_row.png";
+echo form_hidden('id',$e->id);
+?>
+<tr>
+	<td class='form_tag'>Nombre:</td>
+	<td class="form_input"><?php echo form_input($nombre);?></td>
+	<td class='form_tag'>Apellido Paterno</td>
+	<td class="form_input"><?php echo form_input($apaterno);?></td>
+	<td class='form_tag'>Apellido Materno</td>
+	<td class="form_input"><?php echo form_input($amaterno);?></td>
+</tr>
+<tr>
+	<td class='form_tag'>RFC:</td>
+	<td class="form_input"><?php echo form_input($rfc);?></td>
+	<td class='form_tag'>Telefono:</td>
+	<td class="form_input"><?php echo form_input($telefono);?></td>
+	<td class='form_tag'>Domicilio:</td>
+	<td class="form_input"><?php echo form_textarea($domicilio);?></td>
+</tr>
+<tr>
+	<td class='form_tag'>CURP:</td>
+	<td class="form_input"><?php echo form_input($curp);?></td>
+	<td class='form_tag'>Núm. Seguro Social:</td>
+	<td class="form_input"><?php echo form_input($num_seguro);?></td>
+	<td class='form_tag'>Espacio físico:</td>
+	<td class="form_input"><?php echo form_dropdown('espacio_fisico_id', $espacio,$e->espacio_fisico_id,"id='espacio_fisico_id'");?></td>
+</tr>
+<tr>
+	<td class='form_tag'>Puesto:</td>
+	<td class="form_input"><?php echo form_dropdown('puesto_id', $puesto,$e->puesto_id,"id='puesto_id'");?></td>
+	<td class='form_tag'>Nomina:</td>
+	<td class="form_input"><?php echo form_dropdown('tipo_nomina_id', $nomina,$e->tipo_nomina_id,"id='tipo_nomina_id'");?></td>
+	<td class='form_tag'>Horario:</td>
+	<td class="form_input"><?php echo form_dropdown('horario_id', $horario,$e->horario_id,"id='horario_id'");?></td>
+</tr>
+<?php
+
+//Cerrar el Formulario
+echo "<tr><td colspan='6' class=\"form_buttons\">";
+echo form_reset('form1', 'Borrar');
+echo "<button type='button' onclick=\"window.location='".site_url('/'.$ruta.'/empleado_c/formulario/list_empleados')."'\">Cerrar sin guardar</button>";
+echo form_close();
+
+//Permisos de Escritura byte 1
+if(substr(decbin($permisos), 0, 1)==1){
+echo '<button type="submit">Guardar Registro</button>'; 
+}
+echo '</td></tr></table>';
+echo form_fieldset_close(); 
+
+?>
+<a href="<?php echo site_url('/nomina/empleado_c/formulario/list_empleados')?>" title="Listado de empleados">
+<img src="<?php echo base_url()."/images/adduser.png"?>" width=50 height=50 alt="Listado de empleados" align="absmiddle">
+</a>

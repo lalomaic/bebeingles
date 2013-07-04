@@ -1,0 +1,57 @@
+<script>
+  $(document).ready(function() { 
+  $($.date_input.initialize);
+  $(".date_input").date_input(); 
+
+  //$rows_pred;
+    //opciones para el formulario principal
+    var options = { 
+        target:        '#out_form1',   // target element(s) to be updated with server response 
+        beforeSubmit:  totales,  // pre-submit callback 
+//        success:       subform// post-submit callback 
+    }; 
+//Redirecciones a los contenedores de los estatus de los detalles y envio mediante ajax
+    $('#form1').submit(function() {
+        $(this).ajaxSubmit(options);
+        // always return false to prevent standard browser submit and page navigation
+        return false;
+    });
+<?php
+
+
+for($t=0;$t<$rows;$t++){
+  echo "var options$t = {". 
+      "target: '#content$t'". 
+      "};"; 
+}
+
+for($t=0;$t<$rows;$t++){
+  echo     "$('#fdetail$t').submit(function() {".
+        "$(this).ajaxSubmit(options$t);".
+        // always return false to prevent standard browser submit and page navigation
+        "return false;".
+    "});\n";
+//Cantidad, productos, precio, iva y subtotal
+//Echo disparadores de los select de los productos
+}
+?>
+// changing date format to DD/MM/YYYY
+});
+
+function send_detalle(){
+  document.getElementById('boton1').click();
+  for(var y=0;y< <? echo $rows; ?>;y++){
+    var id=parseFloat(eval("document.fdetail"+y+".traspaso_id"+y+".value"));
+    var subtotal=parseFloat( eval("document.fdetail"+y+".subtotal"+y+".value"));
+    if(id > 0 && subtotal>0 ){
+      document.getElementById('b'+y).click();
+    }
+  }
+    document.getElementById("fin").innerHTML= "<button type='button' onclick=\"window.location='".base_url()."index.php/inicio/acceso/".$ruta."/menu'\">Menú</button>";
+ }
+
+function totales(){
+  document.form1.monto_total=document.t1.total;
+  document.form1.iva_total=document.t1.iva;
+}
+</script>

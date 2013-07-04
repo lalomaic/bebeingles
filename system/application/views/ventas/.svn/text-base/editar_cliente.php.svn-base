@@ -1,0 +1,165 @@
+<?php
+foreach($cliente->all as $line){
+	//Construir Municipios
+	$select1[0]="Elija";
+	foreach($municipios->all as $row){
+		$y=$row->id;
+		$select1[$y]=$row->tag;
+	}
+
+	//Construir Estatus
+	$select2 = array();
+	foreach($estatus->all as $row){
+		$y=$row->id;
+		$select2[$y]=$row->tag;
+	}
+
+	//Inputs
+	$razon_social=array(
+			'name'=>'razon_social',
+			'size'=>'60',
+			'value'=>''.$line->razon_social,
+	);
+	$clave=array(
+			'name'=>'clave',
+			'size'=>'30',
+			'value'=>''.$line->clave,
+	);
+	$estado=array(
+			'name'=>'estado',
+			'size'=>'30',
+			'value'=>''.$line->estado,
+	);
+	$municipio=array(
+			'name'=>'municipio',
+			'size'=>'30',
+			'value'=>''.$line->municipio,
+	);
+	$limite_credito=array(
+			'name'=>'limite_credito',
+			'size'=>'10',
+			'value'=>''.$line->limite_credito,
+	);
+	$dias_credito=array(
+			'name'=>'dias_credito',
+			'size'=>'10',
+			'value'=>''.$line->dias_credito,
+	);
+
+	$observaciones=array(
+			'name'=>'observaciones',
+			'columns'=>'60',
+			'rows'=>'4',
+			'value'=>''.$line->observaciones,
+	);
+
+	$rfc=array(
+			'name'=>'rfc',
+			'size'=>'15',
+			'value'=>''.$line->rfc,
+	);
+	$curp=array(
+			'name'=>'curp',
+			'size'=>'15',
+			'value'=>''.$line->curp,
+	);
+	$email=array(
+			'name'=>'email',
+			'size'=>'30',
+			'value'=>''.$line->email,
+	);
+	$colonia=array(
+			'name'=>'colonia',
+			'size'=>'60',
+			'value'=>''.$line->colonia,
+	);
+	$codigo_postal=array(
+			'name'=>'codigo_postal',
+			'size'=>'13',
+			'value'=>''.$line->codigo_postal,
+	);
+	$domicilio=array(
+			'name'=>'domicilio',
+			'size'=>'60',
+			'value'=>''.$line->domicilio,
+	);
+	$calle=array(
+			'name'=>'calle',
+			'size'=>'60',
+			'value'=>''.$line->calle,
+	);
+	$numero_exterior=array(
+			'name'=>'numero_exterior',
+			'size'=>'15',
+			'value'=>''.$line->numero_exterior,
+	);
+	$numero_interior=array(
+			'name'=>'numero_interior',
+			'size'=>'15',
+			'value'=>''.$line->numero_interior,
+	);
+	$localidad=array(
+			'name'=>'localidad',
+			'size'=>'30',
+			'value'=>''.$line->localidad,
+	);
+	$lada=array(
+			'name'=>'lada',
+			'size'=>'4',
+			'value'=>''.$line->lada,
+	);
+	$fax=array(
+			'name'=>'fax',
+			'size'=>'10',
+			'value'=>''.$line->fax,
+	);
+
+	$telefono=array(
+			'name'=>'telefono',
+			'size'=>'20',
+			'value'=>''.$line->telefono,
+	);
+
+
+	//Titulo
+	echo "<h2>Administrar $title</h2>";
+
+	//Abrir Formulario
+	$atrib=array('name'=>'form1');
+	echo form_open($ruta.'/trans/alta_cliente', $atrib) . "\n";
+	echo form_fieldset('<b>Editar Datos Generales del Cliente</b>') . "\n";
+	echo "<table width=\"80%\" class='form_table'>";
+	$img_row="".base_url()."images/table_row.png";
+
+
+	//Campos del Formulario
+
+	echo "<tr><td class='form_tag' colspan='2'><label for=\"razon_social\">Razón Social:</label><br/>"; echo form_input($razon_social); echo "</td><td class='form_tag'><label for=\"clave\">Clave:</label><br/>"; echo form_input($clave);echo "<span id='validate_user'></span></td></tr>";
+
+	echo "<tr><td class='form_tag' colspan='2'><label for=\"domicilio\">Calle y Número:</label><br/>"; echo form_input($domicilio); echo "<br/><label for=\"calle\">Calle: </label><br/>"; echo form_input($calle); echo "<br/><label for=\"numero_exterior\">No. Exterior: </label>"; echo form_input($numero_exterior); echo "<label for=\"numero_interior\">No. Interior: </label>"; echo form_input($numero_interior); echo "<br/><label for=\"colonia\">Colonia: </label><br/>"; echo form_input($colonia); echo "</td><td class='form_tag'><label for=\"localidad\">Localidad: </label><br/>";echo form_input($localidad); echo "<br/><label for=\"municipio\">Municipio: </label><br/>";echo form_input($municipio); echo "<br/><label for=\"estado\">Estado:</label><br/>";echo form_input($estado); echo "</td></tr>";
+
+
+	echo "<tr><td class='form_tag' ><label for=\"codigo_postal\">Código Postal:</label><br/>"; echo form_input($codigo_postal); echo "</td><td class='form_tag'><label for=\"email\">Correo electrónico: </label><br/>"; echo form_input($email);echo "</td><td class='form_tag'><label for=\"telefono\">Teléfono:</label><br/>"; echo form_input($telefono);  echo "</td></tr>";
+
+	echo "<tr><td class='form_tag'><label for=\"lada\">LADA:</label><br/>"; echo form_input($lada); echo "<br/><label for=\"lada\">FAX:</label><br/>"; echo form_input($fax); echo "</td><td class='form_tag'><label for=\"limite_credito\">Limite de Crédito: </label><br/>"; echo form_input($limite_credito);echo "<br/><label for=\"dias_credito\">Días de Crédito: </label><br/>"; echo form_input($dias_credito);echo "</td><td class='form_tag'><label for=\"rfc\">RFC:</label><br/>"; echo form_input($rfc); echo "<br/><label for=\"rfc\">CURP:</label><br/>"; echo form_input($curp); echo "</td></tr>";
+
+
+
+	echo "<tr><td class='form_tag' ><label for=\"estatus_general_id\">Estatus:</label></td><td class='form_tag'>"; echo form_dropdown('estatus_general_id', $select2, "$line->estatus_general_id", "disabled='disabled'"); echo "</td></tr>";
+	//Cerrar el Formulario
+	echo "<tr><td colspan='4' class=\"form_buttons\">";
+	echo form_hidden('id', "$line->id");
+	echo "<button type='button' onclick=\"window.location='".base_url()."index.php/inicio/acceso/".$ruta."/menu'\">Menú</button>";
+	echo form_close();
+
+	//Permisos de Escritura byte 1
+	if(substr(decbin($permisos), 0, 1)==1){
+		echo '<button type="submit">Guardar Cambios</button>';
+	}
+	echo '</td></tr></table>';
+	echo form_fieldset_close();
+
+	//Link al listado
+	echo "<div align=\"left\"><a href=\"".base_url()."index.php/".$ruta."/".$controller."/".$funcion."/list_clientes\"><img src=\"".base_url()."images/proveedor.png\" width=\"50px\" title=\"Listado de Clientes\"></a></div>";
+}
+?>

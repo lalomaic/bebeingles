@@ -1,0 +1,112 @@
+<?php
+//Construir Empresas
+$select1[0]="Elija";
+if($empresas!=false){
+foreach($empresas->all as $row){
+  $y=$row->id;
+    $select1[$y]=$row->razon_social;
+}
+}
+//print_r(array_values($select1));
+
+//Construir Tipos_Espacios
+$select2[0]="Elija";
+if($tipos_espacios!=false){
+foreach($tipos_espacios->all as $row){
+  $y=$row->id;
+    $select2[$y]=$row->tag;
+}
+}
+//Construir Estados
+$select3[0]="Elija";
+if($estados !=false){
+foreach($estados->all as $row){
+  $y=$row->id;
+    $select3[$y]=$row->tag;
+}
+}
+//Construir Municipios
+$select4[0]="Elija";
+if($municipios!=false){
+foreach($municipios->all as $row){
+  $y=$row->id;
+    $select4[$y]=$row->tag;
+}
+}
+//Inputs
+$tag=array(
+ 	   'name'=>'tag',
+ 	   'size'=>'30',
+ 	   'value'=>'',
+	   'id'=>'tag',
+	   );
+
+$clave=array(
+ 	   'name'=>'clave',
+ 	   'size'=>'10',
+ 	   'value'=>'',
+	   'id'=>'clave',
+	   );
+$localidad=array(
+ 	   'name'=>'localidad',
+ 	   'size'=>'30',
+ 	   'value'=>'',
+	   'id'=>'localidad',
+	   );
+$domicilio=array(
+ 	   'name'=>'domicilio',
+ 	   'cols'=>'50',
+	   'rows'=>'4',
+ 	   'value'=>'',
+	   'id'=>'domicilio',
+	   );
+
+$telefono=array(
+ 	   'name'=>'telefono',
+ 	   'size'=>'20',
+ 	   'value'=>'',
+	   'id'=>'telefono',
+	   );
+
+//Titulo
+echo "<h2>$title</h2>";
+
+//Load validacion
+$this->load->view('validation_view');
+
+//Abrir Formulario
+$atrib=array('name'=>'form1','id'=>'form1');
+echo form_open($ruta.'/trans/alta_espacio_f', $atrib) . "\n";
+echo form_fieldset('<b>Datos del Local</b>') . "\n"; 
+//Mensajes de validacion
+echo '<div id="validation_result" class="result_validator" align="center" width="200px"></div>';
+
+echo "<table width=\"80%\" class='form_table'>";
+$img_row="".base_url()."images/table_row.png";
+
+
+//Campos del Formulario
+echo "<tr><td class='form_tag'><label for=\"empresas_id\">Empresa:</label></td><td class='form_input'>"; echo form_dropdown('empresas_id', $select1,0, "id='empresa'");echo "</td><td class='form_tag'><label for=\"tipo_espacio_id\">Tipo de Local: </label></td><td class='form_input'>"; echo form_dropdown('tipo_espacio_id', $select2,0, "id='tipo_espacio'");echo "</td><td class='form_tag'><label for=\"tag\">Nombre del Local:</label></td><td class='form_input'>"; echo form_input($tag); echo "</td></tr>";
+
+echo "<tr><td class='form_tag'><label for=\"estado_id\">Estado:</label></td><td class='form_input'>"; echo form_dropdown('estado_id', $select3,1,"id='estado'");echo "</td><td class='form_tag'><label for=\"municipio_id\">Municipio: </label></td><td class='form_input'>"; echo form_dropdown('municipio_id', $select4,56,"id='municipio'");echo "</td><td class='form_tag'><label for=\"localidad\">Localidad:</label></td><td class='form_input'>"; echo form_input($localidad); echo "</td></tr>";
+
+echo "<tr><td class='form_tag'><label for=\"clave\">Clave del Local:</label></td><td class='form_input'>"; echo form_input($clave); echo "</td><td class='form_tag' ><label for=\"domicilio\">Domicilio Completo:</label></td><td class='form_input'>"; echo form_textarea($domicilio); echo "</td><td class='form_tag'><label for=\"telefono\">TelÃ©fono: </label></td><td class='form_input'>"; echo form_input($telefono);echo "<span id='validate_user'></span></td></tr>";
+
+
+//Cerrar el Formulario
+echo "<tr><td colspan='6' class=\"form_buttons\">";
+echo form_reset('form1', 'Borrar');
+echo "<button type='button' onclick=\"window.location='".base_url()."index.php/inicio/acceso/".$ruta."/menu'\">Cerrar sin guardar</button>";
+echo form_close();
+
+//Permisos de Escritura byte 1
+if(substr(decbin($permisos), 0, 1)==1){
+echo '<button type="submit">Guardar Registro</button>'; 
+}
+echo '</td></tr></table>';
+echo form_fieldset_close(); 
+
+//Link al listado
+echo "<div align=\"left\"><a href=\"".base_url()."index.php/".$ruta."/".$controller."/".$funcion."/list_espacios_f\"><img src=\"".base_url()."images/adduser.png\" width=\"50px\" title=\"Listado de Espacios FÃ­sicos\"></a></div>";
+
+?>

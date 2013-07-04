@@ -1,0 +1,27 @@
+<?php
+function esPar($num){ return !($num%2); }
+$h=5;
+$pdf=new Fpdf_multicell();
+$pdf->AddPage();
+$pdf->Cell(0,$h,$title,0,1,'C');
+$pdf->ln($h);
+$pdf->SetWidths(array(9,40,50,60,22,20));
+$pdf->SetFont('Times','B',10);
+$pdf->SetAligns(array('C','C','C','C','C'));
+$pdf->SetFillColor(200,0,0);
+$pdf->Row(array('#','FAMILIA','SUBFAMILIA','DESCRIPCION','CANTIDAD', 'MONTO'));
+$pdf->SetFont('Times','',9);
+$pdf->SetAligns(array('L','L','L','L','R','R'));
+$r=1;
+foreach ($global->result() as $fila) {
+	if(esPar($r))
+		$pdf->SetFillColor(220,0,0);
+	else
+		$pdf->SetFillColor(255,0,0);
+	$pdf->Row(array($r,$fila->familia, $fila->subfamilia, $fila->descripcion, number_format($fila->cantidad, 1), "$ ".number_format($fila->monto, 2)));
+	$r+=1;
+//	$pdf->Ln($h);
+}
+
+$pdf->Output();
+?>

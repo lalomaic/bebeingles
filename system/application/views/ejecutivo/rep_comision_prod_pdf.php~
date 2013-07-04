@@ -1,0 +1,43 @@
+<?php
+function esPar($num){ return !($num%2); }
+$h=5;
+$pdf=new Fpdf_multicell();
+$pdf->AddPage('L');
+$pdf->Cell(0,$h,$title.' ('.$periodo.')',0,1,'C');
+$pdf->ln($h);
+$pdf->SetWidths(array(80,25,25,35,30,30,30));
+//201
+//$pdf->ln(5);
+foreach($bloques as $eid=>$espacio)
+	{
+	$pdf->SetFont('Times','B',12);
+	$pdf->Cell(0,0,$espacios[$eid]);
+	$pdf->ln($h);
+	$pdf->SetAligns(array('C','C','C','C','C'));
+	$pdf->SetFont('Times','B',8);
+	$pdf->Row(array('Producto','Presentacion','Cantidad','Precio unitario (promedio)','Costo total','% comision','Comision'));
+	$pdf->SetAligns(array('L','L','R','R','R','R','R'));
+	$pdf->SetFont('Times','',8);
+	$r=0;
+	$subtotal=0;
+	foreach($espacio as $pid=>$producto)
+		{
+		foreach($producto as $movimiento)
+			{
+			  if(esPar($r))
+			      $pdf->SetFillColor(220,0,0);
+			  else
+			      $pdf->SetFillColor(255,0,0);
+			  $pdf->Row(array($productos[$pid]['descripcion'],$productos[$pid]['presentacion'],$movimiento['cantidad'],'$ '.$movimiento['costo'],'$ '.$movimiento['total'],$movimiento['comision']." %",'$ '.$movimiento['comision_total']));
+			  $r+=1;
+			  $subtotal+=$movimiento['comision_total'];
+			}
+		}
+		$pdf->SetFillColor(220,0,0);
+		$pdf->Row(array('','','','','','Total',number_format($subtotal,4,".",",")));
+	}
+$pdf->Output();
+// $name=uniqid('reporte_').'.pdf';
+// $pdf->Output($name);
+// echo 'Terminado '.$name;
+?>

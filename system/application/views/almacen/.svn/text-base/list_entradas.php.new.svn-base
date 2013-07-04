@@ -1,0 +1,53 @@
+<script>
+$(document).ready(function() {
+	$('#proveedores').select_autocomplete();
+	$($.date_input.initialize);
+});
+</script>
+
+<?php 
+$default="TODOS";
+$select1[0]=$default;
+	if($ids!= false){
+		foreach($ids->result_array() as $row){
+	  		$y=$row['pr_facturas_id'];
+	    	$select1[$y]=$row['pr_facturas_id'];
+		}
+	}
+$select2[0]=$default;
+	if($proveedores!= false){
+		foreach($proveedores->result_array() as $row){
+	  		$y=$row['id'];
+	    	$select2[$y]=$row['razon_social'];
+		}
+	}
+$fecha=array(
+    'class'=>'date_input',
+    'name'=>'fecha',
+    'size'=>'10',
+    'readonly'=>'readonly',
+    'value'=>'',
+);
+ 
+echo "<h2>$title</h2>"; 
+
+echo "<div align='left' style='background-color:#fff; display:inline-block; width:25%; float:left'>";
+echo "<a href=\"".base_url()."index.php/".$ruta."/".$controller."/".$funcion."/alta_entrada\"><img src=\"".base_url()."images/proveedor.png\" width=\"50px\" title=\"Nueva Entrada\"></a></div>";
+
+$atrib=array('name'=>'form1', 'id'=>'form1', 'target'=>"listado");
+echo form_open($ruta."/".$controller.'/formulario/list_entradas/listado/', $atrib);
+echo "<div align='left' style='background-color:#ccc; border:1px solid black; display:inline-block; width:50%; float:center'>";	
+//echo '<div id="fil" align="center">';
+	echo "<h3 align='center'>Filtrado</h3>";
+	echo "<table width='100%' border='0'>";
+	echo "<tr><td width='15%' bgcolor='#ccc'><label for=\"id\">Id:</label></td><td colspan='3' bgcolor='#ccc'>"; echo form_dropdown('id',$select1, 0); echo "</td></tr>";
+	echo "<tr><td width='15%' bgcolor='#ccc'><label for=\"proveedor\">Proveedor:</label></td><td colspan='3' bgcolor='#ccc'>"; echo form_dropdown('proveedor',$select2, 0, "id='proveedores'"); echo "</td></tr>";
+	echo "<tr><td width='15%' bgcolor='#ccc'><label for=\"fecha\">Fecha:</label></td><td colspan='3' bgcolor='#ccc'>"; echo form_input($fecha); echo "</td></tr>";
+	echo "<tr><td colspan='4' bgcolor='#ccc' align='center'>"; echo "<button type=\"submit\" id=\"boton1\" >Ver Listado</button>"; echo "</td></tr>";
+	echo "</table>";
+	echo "</div>"; 
+//echo '</div>';
+echo form_close();
+
+echo "<table width=\"100%\"><tr align='center'><td><iframe src='' name='listado'  id='frame1' width=\"90%\" height='800'></iframe></td></tr></table>";	
+?>

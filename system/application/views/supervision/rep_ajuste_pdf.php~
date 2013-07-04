@@ -1,0 +1,181 @@
+<?php
+function esPar($num){ return !($num%2); }
+$pdf=new Fpdf_multicell();
+if($arqueo!=false){
+    foreach($arqueo->all as $row) {
+	    $pdf->AddPage("L");
+	    $pdf->SetFont('Times','B',10);
+	    $pdf->Cell(0,5,"$title: Faltantes",'B',1,'L');
+	    $pdf->ln(3);
+	    $pdf->SetFont('Times','',8);
+	    $h = 5;// altura
+	    $pdf->ln($h);
+	    $x1 = $pdf->GetX();
+	    $x2 = $x1+25;
+	    $y = $pdf->GetY();
+	    $arqueo1= array(7,16,35,35,20,20,20,16,30);
+	    $arqueo_detalle1 = array(8, 10,80,14,17,14,40,18,18,18);
+	    $i = 1;
+	    $borde = 1;
+	    $pdf->SetXY($x1,$y);
+	    $pdf->SetWidths($arqueo1);
+	    $pdf->Cell(15,$h,"Id Arqueo:");
+	    $pdf->Cell(23,$h,$row->id,$borde);
+	    $pdf->Cell(4);
+//$pdf->SetTextColor(100);
+	    $pdf->Cell(12,$h,"FECHA:");
+	    $pdf->Cell(17,$h,$row->fecha,$borde);
+	    $pdf->Cell(4);
+	    $pdf->Cell(12,$h,"HORA:");
+	    $pdf->Cell(17,$h,$row->hora,$borde);
+	    $pdf->Cell(4);
+	    $pdf->Cell(16,$h,"ESTATUS:");
+	    $pdf->Cell(0,$h,$row->estatus,$borde);
+	    $pdf->ln($h+1);
+	    $pdf->Cell(41,$h,"UBICACION - CAPTURISTA:");
+	    $pdf->Cell(0,$h,"$row->espacio - $row->usuario",$borde);
+	    $pdf->ln($h+1);
+	    $pdf->ln($h+3);
+	    // detalles de la factura
+	    $pdf->SetWidths($arqueo_detalle1);
+	    $pdf->SetAligns(array("L","C","L","R","R","R","L","R", "R", "R"));
+	    $pdf->SetFont('Times','B',8);
+	    $pdf->SetFillColor(255,0,0);
+	    $pdf->SetDrawColor(1);
+	    $pdf->Row(array("#","Id","Producto","FISICO","SISTEMA","DIF", "ACCIÓN", "ID SALIDA", "P. UNIT", "TOTAL"));
+	    $pdf->SetFont('Times','',7.5);
+	    if(count($datos)>0){
+		$r=0;
+		$total_salidas=0;
+		foreach($datos as $lista){
+
+		      if($lista['accion_id']==5 or $lista['accion_id']==4){
+			  if(esPar($r))
+			      $pdf->SetFillColor(220,0,0);
+			  else
+			      $pdf->SetFillColor(255,0,0);
+
+			  $pdf->Row(array($r+1,$lista['id'], $lista['producto'], number_format($lista['cantidad_real'], 4, ".", ","),number_format($lista['cantidad_sistema'], 4, ".", ","),number_format($lista['diferencia'], 4, ".", ","), $lista['accion'], $lista['transaccion_id'], $lista['precio_unitario'], ($lista['precio_unitario']*$lista['diferencia'])*(-1)));
+			  $r+=1;
+			  $total_salidas+=$lista['precio_unitario']*$lista['diferencia']*(-1);
+		      } 
+		}
+		$pdf->SetFillColor(220,0,0);
+		$pdf->Row(array('','', '','','','','','', 'Total', number_format($total_salidas, 4,".",",")));
+
+		$r=0;
+		$pdf->AddPage('L');
+		$pdf->SetFont('Times','B',10);
+		$pdf->Cell(0,5,"$title: Sobrantes",'B',1,'L');
+		$pdf->ln(3);
+		$pdf->SetFont('Times','',8);
+		$h = 5;// altura
+		$pdf->ln($h);
+		$x1 = $pdf->GetX();
+		$x2 = $x1+25;
+		$y = $pdf->GetY();
+		$arqueo1= array(7,16,35,35,20,20,20,16,30);
+		$arqueo_detalle1 = array(8, 10,80,14,17,14,40,12);
+		$i = 1;
+		$borde = 1;
+		$pdf->SetXY($x1,$y);
+		$pdf->Cell(15,$h,"Id Arqueo:");
+		$pdf->Cell(23,$h,$row->id,$borde);
+		$pdf->Cell(4);
+		//$pdf->SetTextColor(100);
+		$pdf->Cell(12,$h,"FECHA:");
+		$pdf->Cell(17,$h,$row->fecha,$borde);
+		$pdf->Cell(4);
+		$pdf->Cell(12,$h,"HORA:");
+		$pdf->Cell(17,$h,$row->hora,$borde);
+		$pdf->Cell(4);
+		$pdf->Cell(16,$h,"ESTATUS:");
+		$pdf->Cell(0,$h,$row->estatus,$borde);
+		$pdf->ln($h+1);
+		$pdf->Cell(41,$h,"UBICACION - CAPTURISTA:");
+		$pdf->Cell(0,$h,"$row->espacio - $row->usuario",$borde);
+		$pdf->ln($h+1);
+		$pdf->ln($h+3);
+		$pdf->SetFont('Times','B',8);
+		$pdf->SetFillColor(255,0,0);
+		$pdf->SetDrawColor(1);
+		$pdf->Row(array("#","Id","Producto","FISICO","SISTEMA","DIF", "ACCIÓN", "ID ENTRADA.", "P. UNIT", "TOTAL"));
+		$pdf->SetFont('Times','',7.5);
+		$total_entradas=0;
+		//Página de Entradas
+		foreach($datos as $lista){
+
+		      if($lista['accion_id']==2 or $lista['accion_id']==3){
+			  if(esPar($r))
+			      $pdf->SetFillColor(220,0,0);
+			  else
+			      $pdf->SetFillColor(255,0,0);
+			  $pdf->Row(array($r+1,$lista['id'], $lista['producto'], number_format($lista['cantidad_real'], 4, ".", ","),number_format($lista['cantidad_sistema'], 4, ".", ","),number_format($lista['diferencia'], 4, ".", ","), $lista['accion'], $lista['transaccion_id'], $lista['precio_unitario'], ($lista['precio_unitario']*$lista['diferencia'])));
+			  $r+=1;
+			  $total_entradas+=$lista['precio_unitario']*$lista['diferencia'];
+		      } 
+		}
+		$pdf->SetFillColor(220,0,0);
+		$pdf->Row(array('','', '','','','','','', 'Total', number_format($total_entradas, 4,".",",")));
+
+		$r=0;
+		$pdf->AddPage('L');
+		$pdf->SetFont('Times','B',10);
+		$pdf->Cell(0,5,"$title: Sin movimientos",'B',1,'L');
+		$pdf->ln(3);
+		$pdf->SetFont('Times','',8);
+		$h = 5;// altura
+		$pdf->ln($h);
+		$x1 = $pdf->GetX();
+		$x2 = $x1+25;
+		$y = $pdf->GetY();
+		$arqueo1= array(7,16,35,35,20,20,20,16,30);
+		$arqueo_detalle1 = array(8, 10,80,14,17,14,40,12);
+		$i = 1;
+		$borde = 1;
+		$pdf->SetXY($x1,$y);
+		$pdf->Cell(15,$h,"Id Arqueo:");
+		$pdf->Cell(23,$h,$row->id,$borde);
+		$pdf->Cell(4);
+    //$pdf->SetTextColor(100);
+		$pdf->Cell(12,$h,"FECHA:");
+		$pdf->Cell(17,$h,$row->fecha,$borde);
+		$pdf->Cell(4);
+		$pdf->Cell(12,$h,"HORA:");
+		$pdf->Cell(17,$h,$row->hora,$borde);
+		$pdf->Cell(4);
+		$pdf->Cell(16,$h,"ESTATUS:");
+		$pdf->Cell(0,$h,$row->estatus,$borde);
+		$pdf->ln($h+1);
+		$pdf->Cell(41,$h,"UBICACION - CAPTURISTA:");
+		$pdf->Cell(0,$h,"$row->espacio - $row->usuario",$borde);
+		$pdf->ln($h+1);
+		$pdf->ln($h+3);
+		$pdf->SetFont('Times','B',8);
+		$pdf->SetFillColor(255,0,0);
+		$pdf->SetDrawColor(1);
+		$pdf->Row(array("#","Id","Producto","FISICO","SISTEMA","DIF", "ACCIÓN", "ID TR.", "P. UNIT", "TOTAL"));
+		$pdf->SetFont('Times','',7.5);
+		//Página de Entradas
+		foreach($datos as $lista){
+
+		      if($lista['accion_id']==1 or $lista['accion_id']==0 or $lista['accion_id']==NULL){
+			  if(esPar($r))
+			      $pdf->SetFillColor(220,0,0);
+			  else
+			      $pdf->SetFillColor(255,0,0);
+
+			  $accion="Sin transacción";
+			  $pdf->Row(array($r+1,$lista['id'], $lista['producto'], number_format($lista['cantidad_real'], 4, ".", ","),number_format($lista['cantidad_sistema'], 4, ".", ","),number_format($lista['diferencia'], 4, ".", ","), $accion, 0,0,0));
+			  $r+=1;
+		      } 
+		}
+		$pdf->SetFillColor(220,0,0);
+		$pdf->Row(array('','', '','','','','','', 'Total', number_format(0, 4,".",",")));
+	    }
+    }
+    $pdf->Output();
+  } else {
+    echo "No existe Captura de Existencias Reales en dicho periodo de tiempo";
+  }
+?>

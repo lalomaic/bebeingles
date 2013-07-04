@@ -1,0 +1,117 @@
+<?php
+echo "<h2>$title</h2>";
+foreach($espacios->all as $row){
+	$y=$row->id;
+	$select2[$y]=$row->tag;
+}
+?>
+<script>
+  $(document).ready(function() { 
+	  $('#boton2').hide();
+	  $('#leyenda1').hide();
+  	  $('#boton3').hide();
+	  	$(".modal_upload").fancybox({
+		'width'				: '45%',
+		'height'			: '75%',
+		'autoScale'			: false,
+		'transitionIn'		: 'none',
+		'transitionOut'		: 'none',
+		'type'				: 'iframe'
+	});
+
+    //opciones para el formulario principal
+	$($.date_input.initialize);
+    var options = { 
+        target:        '#archivo',   // target element(s) to be updated with server response 
+//        beforeSubmit:  form_principal,  pre-submit callback 
+        success:       mostrar_subform // post-submit callback 
+    }; 
+
+  //Redirecciones a los contenedores de los estatus de los detalles y envio mediante ajax
+    $('#form1').submit(function() {
+        $(this).ajaxSubmit(options);
+        // always return false to prevent standard browser submit and page navigation
+        return false;
+    });
+  });
+	function cargar_csv(){
+		
+		id=$('#id').val();
+ 		window.open("<? echo base_url()."index.php/".$ruta."/".$controller."/".$funcion."/alta_ajuste_inventario/subir_inventario/";?>"+id, '_blank','width=400, height=300');
+	}
+  
+	function send1(){
+		document.report.submit();
+	}
+	function mostrar_subform(){
+	  $('#boton1').hide();
+	  $('#boton2').show();
+	  $('#leyenda1').show();
+   	  $('#boton3').show();
+	}
+	function ejecutar_inventario(){
+		$('#out_form1').html('<img src="<?=base_url()?>images/cargando.gif" width="50px"><br/>Cargando...');
+		alert("Se procede a migrar la información del archivo a la Base de Datos");
+		id=$('#id').val();
+		location.href="<? echo base_url()."index.php/".$ruta."/trans/ejecutar_inventario/";?>"+id;
+	}
+</script>
+<?php 
+$atrib=array('name'=>'form1', 'id'=>'form1');
+echo form_open($ruta."/trans/alta_ajuste_inventario/", $atrib) . "\n";
+$img_row="".base_url()."images/table_row.png";
+?>
+<table width="50%" class='form_table'>
+	<tr>
+		<td width="30%" valign="top">
+			<table border="1">
+				<tr>
+					<th colspan="0">Sucursal</th>
+					<th colspan="2">Inicio</th>
+					<th colspan="2">Final</th>
+				</tr>
+				<tr>
+					<td><?php echo form_dropdown('espacio_fisico_id', $select2, 0);?></td>
+					<td>Fecha<br /> <input type='input' name='fecha_inicio'
+						class="date_input" value='' size="15" title="Fecha de inicio"
+						readonly='readonly'>
+					</td>
+					<td>Hora<br /> <input type='input' name='hora_inicio' value=''
+						size="5" title="Hora en Formato 24 hrs">
+					</td>
+					<td>Fecha<br /> <input type='input' name='fecha_final'
+						class="date_input" value='' size="15" title="Fecha de inicio"
+						readonly='readonly'>
+					</td>
+					<td>Hora<br /> <input type='input' name='hora_final' value=''
+						size="5" title="Hora en Formato 24 hrs">
+					</td>
+				</tr>
+				<tr>
+					<td><div id="leyenda1">
+							<strong>Paso 2. Subir Archivo del Inventario</strong>
+						</div></td>
+					<td colspan="3"><span id="archivo"></span></td>
+					<td align="center"><div id="boton3">
+							<a href="javascript:cargar_csv()"><img
+								src="<?=base_url()?>images/catalogos.png" width="50" border="0"
+								align="center"><br />Subir</a>
+						</div></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<?php
+	echo "<tr><td class=\"form_buttons\" width=\"30%\" valign=\"top\" align=\"right\">";
+	echo "<div id=\"out_form1\" align='right'>";
+	//Permisos de Escritura byte 1
+	if(substr(decbin($permisos), 0, 1)==1){
+		echo '<button type="submit" id="boton1" style="display:block;">Alta de Inventario</button>';
+		echo '<button type="button" id="boton2" style="display:none;" onclick="javascript:ejecutar_inventario()">Cargar Inventario</button>';
+
+}
+echo "</div>";
+echo '</td></tr></table>';
+echo form_fieldset_close();
+echo form_close();
+?>

@@ -1,0 +1,245 @@
+<script>
+  $(document).ready(function() {
+    $('#proveedores').select_autocomplete();
+	$('#subform_detalle').hide();
+	$('.dat_telefonos').hide();
+     $('.visible').show();
+     $('.invisible').hide();
+	 
+	var options = {
+		target:   '#out_form1',   // target
+		success:  mostrar_subform // post-submit callback
+	  };
+	  $('#form1').submit(function() {
+		  $(this).ajaxSubmit(options);
+		  return false;
+	  });
+	 
+	 //Cantidad
+	$('.unidades').keyup(function() { 
+		if($(this).val()!=''){ 
+			sumar_cantidades();
+		} 
+	});
+<?php
+	$base=base_url();
+	for($x=0;$x<=$rows;$x++){
+	  $dif=md5(rand());
+	  echo <<<END
+	  $('#producto_id$x').val('0');
+	  $('#id$x').val('0');
+	  $('#entrada_id$x').val('0');
+	  $("#prod$x").autocomplete('{$base}index.php/ajax_pet/get_productos/{$dif}', {
+			extraParams: {pid: 0, mid: 0},
+			minLength: 3,
+			multiple: false,
+			cacheLength:0,
+			noCache: true,
+			parse: function(data) {
+				return $.map(eval(data), function(row) {
+					return {
+						data: row,
+						value: row.id,
+						result: row.descripcion
+					}
+				});
+			},
+			formatItem: function(item) {
+				return format(item);
+			}
+	  }).result(function(e, item) {
+			$("#producto_id$x").val(""+item.id);
+			
+	  });
+END;
+	  	//Cantidad
+	  echo  "$('#cantidad$x').blur(function() {\n".
+				"u=parseFloat($('#cantidad$x').val()); \n".
+				"sumar_cantidades();\n".
+				"$('#row".($x+1)."').show(''); \n".
+				"$('#row".($x+1)."').removeClass('invisible').addClass('visible'); \n ".
+				"$('#codigo_barras".($x+1)."').focus(); \n".
+				"enviar_renglon($x);\n".
+			"});\n";
+  }
+?>
+   });
+ 
+  function get_producto(id, line){
+    if(id.length>2){
+        $.post("<? echo base_url();?>index.php/ajax_pet/get_producto_by_codigo",{ enviarvalor: id, linea: line, tipo: 'tag'},  // create an object will all values                             //function that is called when server returns a value.
+        function(data){
+            if(data=='No encontrado'){
+                $('#codigo_barras'+line).val('');
+		        alert("El código leido no esta asociado a ningun producto")
+			} else if(data=='No encontrado1'){
+                $('#codigo_barras'+line).val('');
+		        alert("El código de barras esta asociado a 2 o mas productos, favor de capturarlo por descripción")
+			}else {
+				//Escribe el tag del producto
+                $('#prod'+line).val(data);
+				$.post("<? echo base_url();?>index.php/ajax_pet/get_producto_by_codigo",{ enviarvalor: id, linea: line, tipo: 'id'}, 
+				function(data){
+						//Escribe el id del producto
+						$('#producto_id'+line).val(data);
+						$.post("<? echo base_url();?>index.php/ajax_pet/get_cfamilia_by_producto",{ enviarvalor: data}, 
+						function(data){
+							//Si familia == equipo (1)
+							if(data==1){
+								$('#dat_telefonos'+line).show();
+								$('#cantidad'+line).val('1');
+								$('#cantidad'+line).attr('readonly', 'readonly');
+								$('#imey'+line).focus();
+							} else {
+								$('#cantidad'+line).focus();
+							}
+						});
+					});
+				}
+			});
+		} else {
+			alert("El código leido no es correcto, intente de nuevo")
+			$('#codigo_barras'+line).val('');
+    }
+	return false;
+}
+
+function get_producto_by_imey(id, line){
+    if(id.length>2){
+        $.post("<? echo base_url();?>index.php/ajax_pet/get_producto_by_imey",{ enviarvalor: id, linea: line, tipo: 'tag'},  // create an object will all values                             //function that is called when server returns a value.
+        function(data){
+            if(data=='No encontrado'){
+                $('#codigo_barras'+line).val('');
+		        alert("El código IMEY no esta asociado a ningun producto o ya se ha enviado")
+			} else if(data=='No encontrado1'){
+                $('#codigo_barras'+line).val('');
+		        alert("El código IMEY esta asociado a 2 o mas productos")
+			} else if(data=='No encontrado2'){
+                $('#codigo_barras'+line).val('');
+		        alert("El código IMEY ya ha sido enviado")
+			} else {
+				//Escribe el tag del producto
+                $('#prod'+line).val(data);
+				$.post("<? echo base_url();?>index.php/ajax_pet/get_producto_by_imey",{ enviarvalor: id, linea: line, tipo: 'id'}, 
+				function(data){
+						//Escribe el id del producto
+						$('#producto_id'+line).val(data);
+						$.post("<? echo base_url();?>index.php/ajax_pet/get_cfamilia_by_producto",{ enviarvalor: data}, 
+						function(data){
+							//Si familia == equipo (1)
+							if(data==1){
+								$('#cantidad'+line).val('1');
+								$('#cantidad'+line).attr('readonly', 'readonly');
+								//$('#imey'+line).focus();
+							} 
+						});
+						$.post("<? echo base_url();?>index.php/ajax_pet/get_producto_by_imey",{ enviarvalor: id, linea: line, tipo: 'entrada_id'}, 
+						function(data){
+							if(data>0){
+								$('#entrada_id'+line).val(data);
+								//$('#imey'+line).focus();
+								alert("Equipo localizado: "+$('#prod'+line).val());
+								$('#cantidad'+line).focus();
+							} else {
+								alert("No se ha encontrado el codigo IMEY en la ubicacion de salida, favor de revisarlo en inventario");
+								$('#imey'+line).focus();
+							}
+						});
+					});
+				}
+			});
+		} else {
+			alert("El código leido no es correcto, intente de nuevo")
+			$('#imey'+line).val('');
+    }
+	return false;
+}
+
+	function format(r) {
+		  return r.descripcion;
+	}
+	
+	function enviar_renglon(linea){
+		//Validar el traspaso
+		t_id=document.form1.id.value;
+		//Identificar si es un equipo o accesorio
+		imey_js=$('#imey'+linea).val();
+		entrada_js=$('#entrada_id'+linea).val();
+		id_js=$('#id'+linea).val();
+		if(imey_js>0){
+			tipo_js="equ";
+		} else 
+			tipo_js="acc";
+		//Obtener campos clave producto_id y cantidad
+		$('#content'+linea).html("<img src='<? echo base_url(); ?>images/waiting.gif' width='20px'/>");
+		producto=$('#producto_id'+linea).val();
+		cantidad_js=$('#cantidad'+linea).val();
+		if(producto>0 && cantidad_js>0 && t_id>0){
+			$.post("<? echo base_url();?>index.php/almacen/trans/alta_salida_traspasos", { 
+				cproductos_id: producto,
+				cantidad: cantidad_js,
+				imey: $.trim(imey_js),
+				entrada_id: entrada_js,
+				id: id_js,
+				tipo: tipo_js,
+				traspaso_id:t_id
+			}, 
+				function(data){
+					if(data>0){
+						if(tipo='equ'){
+							$('#id'+linea).val(data);
+						}
+						$('#content'+linea).html('<img src="<?=base_url()?>images/ok.png" width="20px" title="Guardado">');
+					} else {
+						$('#content'+linea).html('<img src="<?=base_url()?>images/cancelado.png" width="20px" title="Error">');
+						alert("El producto no tiene existencias suficientes en su ubicacion actual, intente disminuir la cantidad o revisar el inventario");
+					}
+					
+			});
+		} else{
+			$('#content'+linea).html('');
+		}
+	}
+
+function verificar(){
+  var id=eval("document.form1.id.value");
+  location.href="<? echo base_url();?>index.php/<? echo $ruta; ?>/almacen_c/formulario/list_traspasos/";
+}
+
+function mostrar_subform(){
+	
+	$('#subform_detalle').show();
+	alert("Capture los detalles del Traspaso");
+}
+
+  function get_cfamilia(producto_id, linea){
+	$.post("<? echo base_url();?>index.php/ajax_pet/get_cfamilia_by_producto",{ enviarvalor: producto_id}, 
+    function(data){
+		if(data==1){
+			$('#dat_telefonos'+linea).show();
+			$('#cantidad'+linea).val('1');
+			$('#cantidad'+linea).attr('readonly', 'readonly');
+			$('#imey'+linea).focus();
+		}
+    });
+}
+
+  function get_codbar(producto_id, linea){
+	$.post("<? echo base_url();?>index.php/ajax_pet/get_codbar_by_producto",{ enviarvalor: producto_id},  // create an object will all values
+    //function that is called when server returns a value.
+    function(data){
+        $('#codigo_barras'+linea).val(''+data);
+    });
+}
+
+	function sumar_cantidades(){
+		sum=0; sum_iva=0; sum_cant=0;
+		$('#total').val('x');
+		for(x=0;x<=<?=$rows?>;x++){
+				if($('#cantidad'+x).val()>0){
+					sum_cant= sum_cant + parseFloat($('#cantidad'+x).val());
+				}
+			}
+		$('#cantidad_total').val(sum_cant);
+	}
+</script>

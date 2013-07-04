@@ -1,0 +1,17 @@
+<? echo $this->assetlibpro->output('js'); ?>
+<? echo $this->assetlibpro->output('css'); ?>
+<?php
+echo "<h2>Resultad de la busqueda del producto</h2>";
+?>
+<table class="listado" border="1" width="300px">
+	<tr>
+		<th width="200">Tienda</th>
+		<th>Numeracion</th>
+		<th>Existencia</th>
+	</tr>
+	<?php
+	foreach ($detalles as $row) {
+		echo "<tr><td>{$row['tienda']}</td><td align='right'>{$row['numero']}</td><td align='right' >{$row['existencias']}</td></tr>";
+	}
+	?>
+</table>
